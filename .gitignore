@@ -1,0 +1,8 @@
+# Build outputs
+build/Release
+dist/
+out/
+
+# Node modules
+node_modules/
+*.sqlite3
