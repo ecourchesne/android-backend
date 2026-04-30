@@ -28,7 +28,7 @@ router.get('/', auth, (req, res) => {
 });
 
 // POST /api/events
-router.post('/', auth, (req, res) => {
+router.post('/', auth, async (req, res) => {
   const { title, description, date, address, lat, lon, createdBy } = req.body;
   if (!title || !description || !date || !address || lat == null || lon == null || !createdBy) {
     return res.status(400).json({ error: 'Missing required fields' });
