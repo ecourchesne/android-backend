@@ -52,7 +52,7 @@ router.put('/:id', auth, (req, res) => {
   const { title, description, date, address, lat, lon, createdBy } = req.body;
   if (!title || !description || !date || !address || lat == null || lon == null || !createdBy) {
     return res.status(400).json({ error: 'Missing required fields' });
-  }=
+  }
   db.prepare(
     'UPDATE events SET title = ?, description = ?, date = ?, address = ?, lat = ?, lon = ?, createdBy = ? WHERE id = ?'
   ).run(title, description, date, address, lat, lon, createdBy, req.params.id);
