@@ -52,7 +52,7 @@ router.put('/:id', auth, (req, res) => {
   const { title, description, date, address, lat, lon, createdBy } = req.body;
   if (!title || !description || !date || !address || lat == null || lon == null || !createdBy) {
     return res.status(400).json({ error: 'Missing required fields' });
-  }
+  }=
   db.prepare(
     'UPDATE events SET title = ?, description = ?, date = ?, address = ?, lat = ?, lon = ?, createdBy = ? WHERE id = ?'
   ).run(title, description, date, address, lat, lon, createdBy, req.params.id);
@@ -78,13 +78,26 @@ router.get('/:eventId/participants', auth, (req, res) => {
 // POST /api/events/:eventId/participants
 router.post('/:eventId/participants', auth, (req, res) => {
   const { userId } = req.body;
+  const eventId = parseInt(req.params.eventId); // CONVERSION ICI
+
   if (!userId) return res.status(400).json({ error: 'Missing userId' });
-  const existing = db.prepare(
-    'SELECT 1 FROM event_participants WHERE eventId = ? AND userId = ?'
-  ).get(req.params.eventId, userId);
-  if (existing) return res.status(409).json({ error: 'Already participating' });
-  db.prepare('INSERT INTO event_participants (eventId, userId) VALUES (?, ?)').run(req.params.eventId, userId);
-  res.status(201).json({ message: 'Joined event' });
+  if (isNaN(eventId)) return res.status(400).json({ error: 'Invalid eventId' });
+
+  try {
+    const existing = db.prepare(
+      'SELECT 1 FROM event_participants WHERE eventId = ? AND userId = ?'
+    ).get(eventId, userId);
+
+    if (existing) return res.status(409).json({ error: 'Already participating' });
+
+    db.prepare('INSERT INTO event_participants (eventId, userId) VALUES (?, ?)')
+      .run(eventId, userId);
+
+    res.status(201).json({ message: 'Joined event' });
+  } catch (error) {
+    console.error(error); // Pour voir l'erreur réelle dans les logs Render
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // DELETE /api/events/:eventId/participants/:userId
