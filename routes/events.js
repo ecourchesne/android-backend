@@ -33,11 +33,33 @@ router.post('/', auth, (req, res) => {
   if (!title || !description || !date || !address || lat == null || lon == null || !createdBy) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
-  const result = db.prepare(
-    'INSERT INTO events (title, description, date, address, lat, lon, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(title, description, date, address, lat, lon, createdBy);
-  const event = db.prepare('SELECT * FROM events WHERE id = ?').get(result.lastInsertRowid);
-  res.status(201).json(event);
+  
+  try {
+    const result = db.prepare(
+      'INSERT INTO events (title, description, date, address, lat, lon, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).run(title, description, date, address, lat, lon, createdBy);
+    
+    const event = db.prepare('SELECT * FROM events WHERE id = ?').get(result.lastInsertRowid);
+
+    // Envoi de notification aux utilisateurs
+    const { sendNotification } = require('../notificationService');
+    const users = db.prepare('SELECT fcmToken FROM users WHERE fcmToken IS NOT NULL').all();
+    const deviceTokens = users.map(u => u.fcmToken).filter(token => token);
+
+    if (deviceTokens.length > 0) {
+      await sendNotification(
+        deviceTokens,
+        'New Event Added!',
+        `${title} - ${date}`,
+        { eventId: event.id }
+      );
+    }
+
+    res.status(201).json(event);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create event' });
+  }
 });
 
 // GET /api/events/:id

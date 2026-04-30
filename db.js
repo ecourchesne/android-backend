@@ -12,7 +12,8 @@ function initDb() {
       email           TEXT    NOT NULL UNIQUE,
       phone           TEXT    NOT NULL,
       password        TEXT    NOT NULL,
-      profileImageUri TEXT
+      profileImageUri TEXT,
+      fcmToken TEXT
     );
 
     CREATE TABLE IF NOT EXISTS events (

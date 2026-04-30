@@ -30,4 +30,21 @@ router.put('/:id/password', auth, (req, res) => {
   res.json({ message: 'Password updated' });
 });
 
+router.post('/:userId/fcm-token', (req, res) => {
+  try {
+    const { token } = req.body;
+    const userId = req.params.userId;
+    
+    if (!token) {
+      return res.status(400).json({ error: 'Token is required' });
+    }
+
+    db.prepare('UPDATE users SET fcmToken = ? WHERE id = ?').run(token, userId);
+    
+    res.json({ success: true, message: 'FCM token updated' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
