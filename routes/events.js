@@ -95,7 +95,10 @@ router.post('/:eventId/participants', auth, (req, res) => {
 
     res.status(201).json({ message: 'Joined event' });
   } catch (error) {
-    console.error(error); // Pour voir l'erreur réelle dans les logs Render
+    console.error("SQL Error:", error.message); // Regardez les logs Render pour voir le message exact
+    if (error.message.includes('FOREIGN KEY constraint failed')) {
+        return res.status(404).json({ error: 'L’événement ou l’utilisateur n’existe pas sur le serveur.' });
+    }
     res.status(500).json({ error: 'Database error' });
   }
 });
