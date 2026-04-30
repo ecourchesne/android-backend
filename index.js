@@ -1,5 +1,6 @@
 const express = require('express');
 const { initDb } = require('./db');
+const admin = require('./firebase');
 
 const JWT_SECRET = 'homework_secret_key';
 const app = express();
