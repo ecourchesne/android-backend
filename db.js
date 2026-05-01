@@ -33,6 +33,15 @@ function initDb() {
       PRIMARY KEY (eventId, userId)
     );
   `);
+
+  try {
+    db.prepare('ALTER TABLE users ADD COLUMN fcmToken TEXT').run();
+    console.log("fcmToken column added to users table.");
+  } catch (err) {
+    if (!err.message.includes("duplicate column name")) {
+      console.log("Info migration : " + err.message);
+    }
+  }
 }
 
 module.exports = { db, initDb };
